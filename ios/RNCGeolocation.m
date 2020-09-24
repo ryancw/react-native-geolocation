@@ -353,7 +353,7 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
     
   CLGeocoder *geocoder = [CLGeocoder new];
     
-    [geocoder reverseGeocodeLocation:_lastLocationEvent
+    [geocoder reverseGeocodeLocation:location
     completionHandler:^(NSArray *placemarks, NSError *error) {
 
         if (error) {
