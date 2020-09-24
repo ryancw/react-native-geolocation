@@ -148,6 +148,7 @@ RCT_EXPORT_MODULE()
 - (void)dealloc
 {
   _locationManager.delegate = nil;
+  
 }
 
 - (dispatch_queue_t)methodQueue
@@ -176,6 +177,8 @@ RCT_EXPORT_MODULE()
   _locationManager.distanceFilter  = distanceFilter;
   _locationManager.desiredAccuracy = desiredAccuracy;
   _usingSignificantChanges = useSignificantChanges;
+    
+    [_locationManager requestLocation];
 }
 
 #pragma mark - Timeout handler
@@ -189,6 +192,7 @@ RCT_EXPORT_MODULE()
 
   // Stop updating if no pending requests
   if (_pendingRequests.count == 0 && !_observingLocation) {
+      
   }
 }
 
