@@ -348,13 +348,45 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
   if (_observingLocation) {
     [self sendEventWithName:@"geolocationDidChange" body:_lastLocationEvent];
   }
+    
+  CLGeocoder *geocoder = [CLGeocoder new];
+    
+    [geocoder reverseGeocodeLocation:_lastLocationEvent
+    completionHandler:^(NSArray *placemarks, NSError *error) {
+
+        if (error) {
+            NSLog(@"Geocode failed with error: %@", error);
+            return; // Request failed, log error
+        }
+
+        // Check if any placemarks were found
+        if (placemarks && placemarks.count > 0)
+        {
+            CLPlacemark *placemark = placemarks[0];
+
+            // Dictionary containing address information
+            NSDictionary *addressDictionary =
+            placemark.addressDictionary;
+
+            // Extract address information
+            NSLog(@"%@ ", addressDictionary);
+            NSString *state = [addressDictionary
+                               objectForKey:(NSString *)administrativeArea];
+
+            NSLog(@"%@ %@ %@ %@", address,city, state, zip);
+            for (RNCGeolocationRequest *request in _pendingRequests) {
+              request.successBlock(@[state]);
+              [request.timeoutTimer invalidate];
+            }
+            [_pendingRequests removeAllObjects];
+        } else {
+            
+        }
+
+    }];
 
   // Fire all queued callbacks
-  for (RNCGeolocationRequest *request in _pendingRequests) {
-    request.successBlock(@[_lastLocationEvent]);
-    [request.timeoutTimer invalidate];
-  }
-  [_pendingRequests removeAllObjects];
+  
 
   // Stop updating if not observing
   if (!_observingLocation) {
