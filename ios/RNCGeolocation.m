@@ -292,14 +292,14 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
   }
 
   // Check if previous recorded location exists and is good enough
-  if (_lastLocationEvent &&
-      [NSDate date].timeIntervalSince1970 - [RCTConvert NSTimeInterval:_lastLocationEvent[@"timestamp"]] < options.maximumAge &&
-      [_lastLocationEvent[@"coords"][@"accuracy"] doubleValue] <= options.accuracy) {
-
-    // Call success block with most recent known location
-    successBlock(@[_lastLocationEvent]);
-    return;
-  }
+//  if (_lastLocationEvent &&
+//      [NSDate date].timeIntervalSince1970 - [RCTConvert NSTimeInterval:_lastLocationEvent[@"timestamp"]] < options.maximumAge &&
+//      [_lastLocationEvent[@"coords"][@"accuracy"] doubleValue] <= options.accuracy) {
+//
+//    // Call success block with most recent known location
+//    successBlock(@[_lastLocationEvent]);
+//    return;
+//  }
 
   // Create request
   RNCGeolocationRequest *request = [RNCGeolocationRequest new];
@@ -333,18 +333,6 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
 {
   // Create event
   CLLocation *location = locations.lastObject;
-  _lastLocationEvent = @{
-                         @"coords": @{
-                             @"latitude": @(location.coordinate.latitude),
-                             @"longitude": @(location.coordinate.longitude),
-                             @"altitude": @(location.altitude),
-                             @"accuracy": @(location.horizontalAccuracy),
-                             @"altitudeAccuracy": @(location.verticalAccuracy),
-                             @"heading": @(location.course),
-                             @"speed": @(location.speed),
-                             },
-                         @"timestamp": @([location.timestamp timeIntervalSince1970] * 1000) // in ms
-                         };
 
   // Send event
   if (_observingLocation) {
@@ -366,10 +354,27 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
         {
             CLPlacemark *placemark = placemarks[0];
 
-            NSString *state = placemark.administrativeArea;
+            //NSString *state = placemark.administrativeArea;
+            
+
+            _lastLocationEvent = @{
+                                   @"coords": @{
+                                       @"latitude": @(location.coordinate.latitude),
+                                       @"longitude": @(location.coordinate.longitude),
+                                       @"altitude": @(location.altitude),
+                                       @"accuracy": @(location.horizontalAccuracy),
+                                       @"altitudeAccuracy": @(location.verticalAccuracy),
+                                       @"heading": @(location.course),
+                                       @"speed": @(location.speed),
+                                       },
+                                   @"address": @{
+                                           @"state": @(placemark.administrativeArea),
+                                   },
+                                   @"timestamp": @([location.timestamp timeIntervalSince1970] * 1000) // in ms
+                                   };
 
             for (RNCGeolocationRequest *request in _pendingRequests) {
-              request.successBlock(@[state]);
+              request.successBlock(@[_lastLocationEvent]);
               [request.timeoutTimer invalidate];
             }
             [_pendingRequests removeAllObjects];
