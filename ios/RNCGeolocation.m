@@ -11,6 +11,7 @@
 #import <CoreLocation/CLLocationManager.h>
 #import <CoreLocation/CLLocationManagerDelegate.h>
 #import <CoreLocation/CLGeocoder.h>
+#import <CoreLocation/CLPlacemark.h>
 
 #import <React/RCTAssert.h>
 #import <React/RCTBridge.h>
@@ -365,7 +366,7 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
         {
             CLPlacemark *placemark = placemarks[0];
 
-            NSString *state = placemark.administrativeArea
+            NSString *state = placemark.administrativeArea;
 
             for (RNCGeolocationRequest *request in _pendingRequests) {
               request.successBlock(@[state]);
