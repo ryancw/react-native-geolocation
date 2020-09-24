@@ -147,10 +147,6 @@ RCT_EXPORT_MODULE()
 
 - (void)dealloc
 {
-  _usingSignificantChanges ?
-  [_locationManager stopMonitoringSignificantLocationChanges] :
-  [_locationManager stopUpdatingLocation];
-
   _locationManager.delegate = nil;
 }
 
@@ -180,11 +176,6 @@ RCT_EXPORT_MODULE()
   _locationManager.distanceFilter  = distanceFilter;
   _locationManager.desiredAccuracy = desiredAccuracy;
   _usingSignificantChanges = useSignificantChanges;
-
-  // Start observing location
-  _usingSignificantChanges ?
-  [_locationManager startMonitoringSignificantLocationChanges] :
-  [_locationManager startUpdatingLocation];
 }
 
 #pragma mark - Timeout handler
@@ -198,9 +189,6 @@ RCT_EXPORT_MODULE()
 
   // Stop updating if no pending requests
   if (_pendingRequests.count == 0 && !_observingLocation) {
-    _usingSignificantChanges ?
-    [_locationManager stopMonitoringSignificantLocationChanges] :
-    [_locationManager stopUpdatingLocation];
   }
 }
 
@@ -220,10 +208,7 @@ RCT_EXPORT_METHOD(requestAuthorization)
   BOOL wantsAlways = NO;
   BOOL wantsWhenInUse = NO;
   if (_locationConfiguration.authorizationLevel == RNCGeolocationAuthorizationLevelDefault) {
-    if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"] &&
-        [_locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
-      wantsAlways = YES;
-    } else if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"] &&
+    if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"] &&
                [_locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
       wantsWhenInUse = YES;
     }
@@ -235,14 +220,10 @@ RCT_EXPORT_METHOD(requestAuthorization)
 
   // Request location access permission
   if (wantsAlways) {
-    [_locationManager requestAlwaysAuthorization];
 
     // On iOS 9+ we also need to enable background updates
     NSArray *backgroundModes  = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
     if (backgroundModes && [backgroundModes containsObject:@"location"]) {
-      if ([_locationManager respondsToSelector:@selector(setAllowsBackgroundLocationUpdates:)]) {
-        [_locationManager setAllowsBackgroundLocationUpdates:YES];
-      }
     }
   } else if (wantsWhenInUse) {
     [_locationManager requestWhenInUseAuthorization];
@@ -272,9 +253,6 @@ RCT_EXPORT_METHOD(stopObserving)
 
   // Stop updating if no pending requests
   if (_pendingRequests.count == 0) {
-    _usingSignificantChanges ?
-    [_locationManager stopMonitoringSignificantLocationChanges] :
-    [_locationManager stopUpdatingLocation];
   }
 }
 
@@ -376,9 +354,6 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
 
   // Stop updating if not observing
   if (!_observingLocation) {
-    _usingSignificantChanges ?
-    [_locationManager stopMonitoringSignificantLocationChanges] :
-    [_locationManager stopUpdatingLocation];
   }
 
 }
