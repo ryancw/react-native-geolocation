@@ -10,6 +10,7 @@
 #import <CoreLocation/CLError.h>
 #import <CoreLocation/CLLocationManager.h>
 #import <CoreLocation/CLLocationManagerDelegate.h>
+#import <CoreLocation/CLGeocoder.h>
 
 #import <React/RCTAssert.h>
 #import <React/RCTBridge.h>
@@ -364,16 +365,8 @@ RCT_EXPORT_METHOD(getCurrentPosition:(RNCGeolocationOptions)options
         {
             CLPlacemark *placemark = placemarks[0];
 
-            // Dictionary containing address information
-            NSDictionary *addressDictionary =
-            placemark.addressDictionary;
+            NSString *state = placemark.administrativeArea
 
-            // Extract address information
-            NSLog(@"%@ ", addressDictionary);
-            NSString *state = [addressDictionary
-                               objectForKey:(NSString *)administrativeArea];
-
-            NSLog(@"%@ %@ %@ %@", address,city, state, zip);
             for (RNCGeolocationRequest *request in _pendingRequests) {
               request.successBlock(@[state]);
               [request.timeoutTimer invalidate];
